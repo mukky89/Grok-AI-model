@@ -16,25 +16,26 @@ Kompletný setup pre tvorbu **konzistentnej realistickej AI modelky** na **Flux.
 ## Rýchly start na RunPode
 
 ```bash
-# 1. Clone
 cd /workspace
 git clone https://github.com/mukky89/Grok-AI-model.git
 cd Grok-AI-model
+bash scripts/runpod.sh setup
+```
 
-# 2. Inštalácia custom nodes
-bash install.sh
+Ak už repo existuje:
 
-# 3. Stiahnutie Flux + text encoders + VAE
-bash download_models.sh
-
-# 4. Over súbory + štart ComfyUI
-bash scripts/verify_setup.sh
-bash scripts/start_comfyui.sh --tmux
+```bash
+cd /workspace/Grok-AI-model
+git pull
+bash scripts/runpod.sh start     # ComfyUI v tmux na 8188
+bash scripts/runpod.sh status    # žije?
 ```
 
 Potom stiahni **aidmaNSFWunlock** z Civitai (link v `models.txt`) do `models/loras/`.
 
-Načítaj `workflows/flux_nsfw_basic.json` v ComfyUI (port 8188).
+Načítaj `workflows/flux_nsfw_basic.json`. Najprv portréty, až potom full body.
+
+UI: `https://POD_ID-8188.proxy.runpod.net`
 
 ---
 
@@ -44,36 +45,12 @@ Všetko spúšťaj cez `bash` (na RunPode je `/bin/sh` = dash).
 
 | Skript | Čo robí |
 |---|---|
-| `scripts/verify_setup.sh` | Skontroluje Flux UNET, CLIP, VAE, unlock LoRA, port 8188 |
-| `scripts/start_comfyui.sh` | Štart `0.0.0.0:8188` cez `.venv-cu128` |
-| `scripts/start_comfyui.sh --tmux` | To isté v tmux session `comfy` |
-| `scripts/prepare_dataset.sh` | Vytvorí `dataset/luna23/{portraits,half_body,full_body,nsfw}` |
-
----
-
-## Štruktúra
-
-```
-Grok-AI-model/
-├── README.md
-├── install.sh
-├── download_models.sh
-├── models.txt
-├── scripts/
-│   ├── verify_setup.sh
-│   ├── start_comfyui.sh
-│   └── prepare_dataset.sh
-├── character/
-│   ├── description.md
-│   └── training_guide.md
-├── prompts/
-├── workflows/
-│   ├── flux_nsfw_basic.json
-│   ├── 01_flux_basic.md
-│   ├── 02_character_consistency.md
-│   └── 03_dataset_generator.md
-└── dataset/luna23/          ← vznikne po prepare_dataset.sh
-```
+| `scripts/runpod.sh setup` | pull + nodes + models + dataset + start |
+| `scripts/runpod.sh start` | ComfyUI v tmux `0.0.0.0:8188` |
+| `scripts/runpod.sh status` | port + /system_stats |
+| `scripts/runpod.sh stop` | zastaví tmux comfy |
+| `scripts/verify_setup.sh` | skontroluje Flux súbory |
+| `scripts/prepare_dataset.sh` | `dataset/luna23/{portraits,half_body,full_body,nsfw}` |
 
 ---
 
