@@ -1,103 +1,180 @@
 {
-  "1": {
-    "inputs": {
-      "unet_name": "flux1-dev-fp8.safetensors",
-      "weight_dtype": "default"
+  "last_node_id": 11,
+  "last_link_id": 12,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [40, 40],
+      "size": [320, 82],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "outputs": [{"name": "MODEL", "type": "MODEL", "links": [1]}],
+      "properties": {"Node name for S&R": "UNETLoader"},
+      "widgets_values": ["flux1-dev-fp8.safetensors", "default"]
     },
-    "class_type": "UNETLoader",
-    "_meta": { "title": "Load Diffusion Model" }
+    {
+      "id": 2,
+      "type": "DualCLIPLoader",
+      "pos": [40, 180],
+      "size": [360, 130],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "outputs": [{"name": "CLIP", "type": "CLIP", "links": [2]}],
+      "properties": {"Node name for S&R": "DualCLIPLoader"},
+      "widgets_values": ["t5xxl_fp8_e4m3fn.safetensors", "clip_l.safetensors", "flux", "default"]
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "pos": [40, 360],
+      "size": [300, 58],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "outputs": [{"name": "VAE", "type": "VAE", "links": [11]}],
+      "properties": {"Node name for S&R": "VAELoader"},
+      "widgets_values": ["ae.safetensors"]
+    },
+    {
+      "id": 4,
+      "type": "LoraLoader",
+      "pos": [460, 40],
+      "size": [360, 126],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "clip", "type": "CLIP", "link": 2}
+      ],
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [3]},
+        {"name": "CLIP", "type": "CLIP", "links": [4, 5]}
+      ],
+      "properties": {"Node name for S&R": "LoraLoader"},
+      "widgets_values": ["aidmaNSFWunlock-FLUX-V0.2.safetensors", 0.75, 0.75]
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [880, 40],
+      "size": [420, 200],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [{"name": "clip", "type": "CLIP", "link": 4}],
+      "outputs": [{"name": "CONDITIONING", "type": "CONDITIONING", "links": [6]}],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["aidmaNSFWunlock, raw photo of one petite 23 year old northern european woman, long straight honey-blonde hair, light blue eyes, small cute face, pointed chin, slim petite body, full body head-to-toe, both feet visible, standing on hotel carpet, one hand on hip, nude, exposed breasts, erect nipples, shaved vulva, labia visible, black lace garter belt with four straps, sheer black stockings, straps connected to stockings, black stiletto high heels on both feet, real skin pores, peach fuzz, slight redness on joints, film grain, flash photo, unretouched, 35mm kodak portra"],
+      "title": "Positive"
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [880, 280],
+      "size": [420, 160],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [{"name": "clip", "type": "CLIP", "link": 5}],
+      "outputs": [{"name": "CONDITIONING", "type": "CONDITIONING", "links": [8]}],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["illustration, cgi, 3d, plastic skin, airbrushed, beauty filter, instagram face, doll face, poreless, wax figure, different woman, brown hair, dark eyes, tall, wide hips, child, teen, underage, deformed feet, extra toes, fused toes, broken heels, missing shoes, cropped feet, cropped head, extra legs, twisted garter, floating straps, extra fingers, watermark, text"],
+      "title": "Negative"
+    },
+    {
+      "id": 7,
+      "type": "FluxGuidance",
+      "pos": [1360, 40],
+      "size": [240, 58],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [{"name": "conditioning", "type": "CONDITIONING", "link": 6}],
+      "outputs": [{"name": "CONDITIONING", "type": "CONDITIONING", "links": [7]}],
+      "properties": {"Node name for S&R": "FluxGuidance"},
+      "widgets_values": [2.6]
+    },
+    {
+      "id": 8,
+      "type": "EmptyLatentImage",
+      "pos": [1360, 360],
+      "size": [270, 106],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "outputs": [{"name": "LATENT", "type": "LATENT", "links": [9]}],
+      "properties": {"Node name for S&R": "EmptyLatentImage"},
+      "widgets_values": [768, 1344, 1]
+    },
+    {
+      "id": 9,
+      "type": "KSampler",
+      "pos": [1640, 40],
+      "size": [280, 262],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 3},
+        {"name": "positive", "type": "CONDITIONING", "link": 7},
+        {"name": "negative", "type": "CONDITIONING", "link": 8},
+        {"name": "latent_image", "type": "LATENT", "link": 9}
+      ],
+      "outputs": [{"name": "LATENT", "type": "LATENT", "links": [10]}],
+      "properties": {"Node name for S&R": "KSampler"},
+      "widgets_values": [746037625507903, "randomize", 32, 1, "euler", "simple", 1]
+    },
+    {
+      "id": 10,
+      "type": "VAEDecode",
+      "pos": [1980, 40],
+      "size": [210, 46],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 10},
+        {"name": "vae", "type": "VAE", "link": 11}
+      ],
+      "outputs": [{"name": "IMAGE", "type": "IMAGE", "links": [12]}],
+      "properties": {"Node name for S&R": "VAEDecode"},
+      "widgets_values": []
+    },
+    {
+      "id": 11,
+      "type": "SaveImage",
+      "pos": [2240, 40],
+      "size": [270, 58],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [{"name": "images", "type": "IMAGE", "link": 12}],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["luna23_fullbody"]
+    }
+  ],
+  "links": [
+    [1, 1, 0, 4, 0, "MODEL"],
+    [2, 2, 0, 4, 1, "CLIP"],
+    [3, 4, 0, 9, 0, "MODEL"],
+    [4, 4, 1, 5, 0, "CLIP"],
+    [5, 4, 1, 6, 0, "CLIP"],
+    [6, 5, 0, 7, 0, "CONDITIONING"],
+    [7, 7, 0, 9, 1, "CONDITIONING"],
+    [8, 6, 0, 9, 2, "CONDITIONING"],
+    [9, 8, 0, 9, 3, "LATENT"],
+    [10, 9, 0, 10, 0, "LATENT"],
+    [11, 3, 0, 10, 1, "VAE"],
+    [12, 10, 0, 11, 0, "IMAGE"]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {"scale": 0.7, "offset": [0, 0]}
   },
-  "2": {
-    "inputs": {
-      "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
-      "clip_name2": "clip_l.safetensors",
-      "type": "flux",
-      "device": "default"
-    },
-    "class_type": "DualCLIPLoader",
-    "_meta": { "title": "DualCLIPLoader" }
-  },
-  "3": {
-    "inputs": {
-      "vae_name": "ae.safetensors"
-    },
-    "class_type": "VAELoader",
-    "_meta": { "title": "Load VAE" }
-  },
-  "4": {
-    "inputs": {
-      "lora_name": "aidmaNSFWunlock-FLUX-V0.2.safetensors",
-      "strength_model": 0.75,
-      "strength_clip": 0.75,
-      "model": ["1", 0],
-      "clip": ["2", 0]
-    },
-    "class_type": "LoraLoader",
-    "_meta": { "title": "Load LoRA unlock" }
-  },
-  "5": {
-    "inputs": {
-      "text": "aidmaNSFWunlock, raw photo of one petite 23 year old northern european woman, long straight honey-blonde hair, light blue eyes, small cute face, pointed chin, slim petite body, full body head-to-toe, both feet visible, standing on hotel carpet, one hand on hip, nude, exposed breasts, erect nipples, shaved vulva, labia visible, black lace garter belt with four straps, sheer black stockings, straps connected to stockings, black stiletto high heels on both feet, real skin pores, peach fuzz, slight redness on joints, film grain, flash photo, unretouched, 35mm kodak portra",
-      "clip": ["4", 1]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": { "title": "Positive" }
-  },
-  "6": {
-    "inputs": {
-      "text": "illustration, cgi, 3d, plastic skin, airbrushed, beauty filter, instagram face, doll face, poreless, wax figure, different woman, brown hair, dark eyes, tall, wide hips, child, teen, underage, deformed feet, extra toes, fused toes, broken heels, missing shoes, cropped feet, cropped head, extra legs, twisted garter, floating straps, extra fingers, watermark, text",
-      "clip": ["4", 1]
-    },
-    "class_type": "CLIPTextEncode",
-    "_meta": { "title": "Negative" }
-  },
-  "7": {
-    "inputs": {
-      "guidance": 2.6,
-      "conditioning": ["5", 0]
-    },
-    "class_type": "FluxGuidance",
-    "_meta": { "title": "FluxGuidance" }
-  },
-  "8": {
-    "inputs": {
-      "width": 768,
-      "height": 1344,
-      "batch_size": 1
-    },
-    "class_type": "EmptyLatentImage",
-    "_meta": { "title": "Empty Latent Image" }
-  },
-  "9": {
-    "inputs": {
-      "seed": 746037625507903,
-      "steps": 32,
-      "cfg": 1,
-      "sampler_name": "euler",
-      "scheduler": "simple",
-      "denoise": 1,
-      "model": ["4", 0],
-      "positive": ["7", 0],
-      "negative": ["6", 0],
-      "latent_image": ["8", 0]
-    },
-    "class_type": "KSampler",
-    "_meta": { "title": "KSampler" }
-  },
-  "10": {
-    "inputs": {
-      "samples": ["9", 0],
-      "vae": ["3", 0]
-    },
-    "class_type": "VAEDecode",
-    "_meta": { "title": "VAE Decode" }
-  },
-  "11": {
-    "inputs": {
-      "filename_prefix": "luna23_fullbody",
-      "images": ["10", 0]
-    },
-    "class_type": "SaveImage",
-    "_meta": { "title": "Save Image" }
-  }
+  "version": 0.4
 }
