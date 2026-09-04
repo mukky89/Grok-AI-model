@@ -8,6 +8,7 @@ import copy
 import json
 import sys
 import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -24,16 +25,24 @@ def http_json(url: str, payload: dict | None = None, timeout: int = 60) -> dict:
     if payload is not None:
         data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers=headers)
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        raw = resp.read()
-        if not raw:
-            return {}
-        return json.loads(raw.decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read()
+            if not raw:
+                return {}
+            return json.loads(raw.decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")
+        print(f"HTTP {exc.code} {url}")
+        print(body[:4000])
+        raise SystemExit(1) from exc
 
 
 def wait_alive(base: str) -> None:
     try:
         http_json(f"{base}/system_stats", timeout=8)
+    except SystemExit:
+        raise
     except Exception as exc:
         raise SystemExit(
             f"ComfyUI nebeží na {base}\n"
@@ -81,8 +90,8 @@ def main() -> None:
     p.add_argument("--steps", type=int, default=32)
     p.add_argument("--width", type=int, default=832)
     p.add_argument("--height", type=int, default=1216)
-    p.add_argument("--sampler", default="dpmpp_2m")
-    p.add_argument("--scheduler", default="beta")
+    p.add_argument("--sampler", default="euler")
+    p.add_argument("--scheduler", default="simple")
     p.add_argument("--timeout", type=int, default=420)
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()
@@ -102,6 +111,8 @@ def main() -> None:
         f"base={base} count={args.count} explicit={args.explicit} "
         f"{args.width}x{args.height} {args.sampler}/{args.scheduler} g={args.guidance}"
     )
+    print(f"lora1={args.lora} @ {args.lora_strength}")
+    print(f"lora2={args.lora2 or '(off)'} @ {args.lora2_strength}")
 
     for i in range(args.count):
         seed = rng_seed + i
@@ -115,6 +126,7 @@ def main() -> None:
             wf["4b"]["inputs"]["strength_model"] = args.lora2_strength
             wf["4b"]["inputs"]["strength_clip"] = args.lora2_strength
         else:
+            wf["4b"]["inputs"]["lora_name"] = args.lora
             wf["4b"]["inputs"]["strength_model"] = 0.0
             wf["4b"]["inputs"]["strength_clip"] = 0.0
         wf["5"]["inputs"]["text"] = pos
