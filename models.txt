@@ -1,38 +1,49 @@
-# Odporúčané modely pre realistickú AI modelku (Flux + A40)
+# Grok AI Model - Recommended Models (Flux + A40) - September 2026
 
-## 1. Base Model (povinné)
-- Flux.1 Dev (fp8 alebo GGUF Q8)
-  Odporúčané: https://huggingface.co/black-forest-labs/FLUX.1-dev
-  Alternatíva: city96 GGUF verzie
+## 1. Base Model (required)
+Flux.1 Dev
+- Preferred: FP8 version (faster, less VRAM)
+  Download via script or:
+  https://huggingface.co/Kijai/flux-fp8  (flux1-dev-fp8.safetensors)
+  or official: https://huggingface.co/black-forest-labs/FLUX.1-dev
 
-## 2. Text Encoders + VAE
-- CLIP-L + T5-XXL (flux_text_encoders)
-- ae.safetensors (VAE)
+Place in: models/unet/
 
-## 3. NSFW Unlock LoRA (povinné)
-- aidmaNSFWunlock (alebo aktuálny najlepší Flux NSFW unlock na Civitai)
-  Sila: 0.6 – 0.9
+## 2. Text Encoders
+- clip_l.safetensors
+- t5xxl_fp8_e4m3fn.safetensors  (or t5xxl_fp16 if you want max quality)
 
-## 4. Realistické / Nude LoRA (odporúčané)
-- Photorealistic nude v2 (Flux)
-- Realistic_Nudes Flux v2.1
-- Detail skin / pores LoRA
-- Anatomy / genitals LoRA (pre explicitný obsah)
+From: https://huggingface.co/comfyanonymous/flux_text_encoders
+Place in: models/clip/
 
-## 5. Character LoRA (po natrénovaní)
-- Tvoja vlastná: luna23_v1.safetensors (alebo tvoj trigger)
-  Sila: 0.75 – 0.95
+## 3. VAE
+- ae.safetensors
+From: black-forest-labs/FLUX.1-dev or FLUX.1-schnell
+Place in: models/vae/
 
-## 6. Face Consistency
+## 4. NSFW Unlock LoRA (REQUIRED)
+**aidmaNSFWunlock** (most popular, ~19 MB)
+- Civitai: https://civitai.com/models/674027
+- Trigger word: aidmaNSFWunlock
+- Strength: 0.7 – 0.9
+- Place in: models/loras/
+
+## 5. Realism / Nude LoRAs (strongly recommended)
+- Photorealistic nude v2 (Flux) or "Nude Style for FLUX V2"
+- Search Civitai for best current version
+- Strength: 0.6 – 0.8
+
+## 6. Character LoRA (after you train it)
+- luna23_v1.safetensors (or your chosen trigger)
+- Strength: 0.8 – 0.95
+
+## 7. Face Consistency
 - IP-Adapter FaceID Plus V2
-- InstantID (ak chceš ešte silnejší lock)
+- InstantID models (via ComfyUI Manager)
 
-## 7. Upscaler
-- 4x-UltraSharp alebo SeedVR2
-- UltimateSDUpscale
-
-## Odporúčané nastavenia generovania (Flux)
+## Recommended Generation Settings (Flux)
 - Steps: 20–28
-- Sampler: Euler / DPM++ 2M
-- CFG: 1.0 – 3.5 (Flux má nízke CFG)
-- Resolution: 896×1152 alebo 1024×1536 (portrait)
+- Sampler: euler
+- Scheduler: simple
+- CFG / Guidance: 2.5 – 3.5
+- Resolution: 896×1152 or 1024×1536 (portrait)
