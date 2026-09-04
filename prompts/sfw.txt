@@ -1,0 +1,16 @@
+# SFW Prompt Templates
+
+## Portrait
+{base}, close-up portrait, looking at viewer, soft natural lighting, detailed face, subtle smile, realistic photo, 85mm lens
+
+## Half body
+{base}, half body shot, wearing casual summer dress, outdoor, natural light, looking at viewer, realistic photograph
+
+## Full body
+{base}, full body, standing, wearing tight jeans and white top, street style, natural lighting, realistic photo
+
+## Lingerie (soft)
+{base}, wearing elegant black lingerie, sitting on bed, soft bedroom lighting, seductive look, realistic photo
+
+## Beach / Outdoor
+{base}, bikini, beach, golden hour, wind in hair, smiling, realistic photograph

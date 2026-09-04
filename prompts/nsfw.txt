@@ -1,0 +1,16 @@
+# NSFW Prompt Templates
+
+## Soft Nude
+{base}, completely nude, lying on bed, soft lighting, looking at viewer, detailed skin, realistic photo, natural breasts
+
+## Explicit
+{base}, completely nude, legs spread, detailed vagina, wet, looking at viewer, realistic photograph, highly detailed anatomy
+
+## From behind
+{base}, nude, from behind, on all fours, detailed ass, looking back at viewer, realistic photo
+
+## Shower
+{base}, wet skin, nude in shower, water droplets, steam, realistic photo
+
+## Close-up
+{base}, extreme close-up of vagina, detailed labia, realistic texture, soft lighting

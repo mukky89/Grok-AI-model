@@ -1,0 +1,38 @@
+# Odporúčané modely pre realistickú AI modelku (Flux + A40)
+
+## 1. Base Model (povinné)
+- Flux.1 Dev (fp8 alebo GGUF Q8)
+  Odporúčané: https://huggingface.co/black-forest-labs/FLUX.1-dev
+  Alternatíva: city96 GGUF verzie
+
+## 2. Text Encoders + VAE
+- CLIP-L + T5-XXL (flux_text_encoders)
+- ae.safetensors (VAE)
+
+## 3. NSFW Unlock LoRA (povinné)
+- aidmaNSFWunlock (alebo aktuálny najlepší Flux NSFW unlock na Civitai)
+  Sila: 0.6 – 0.9
+
+## 4. Realistické / Nude LoRA (odporúčané)
+- Photorealistic nude v2 (Flux)
+- Realistic_Nudes Flux v2.1
+- Detail skin / pores LoRA
+- Anatomy / genitals LoRA (pre explicitný obsah)
+
+## 5. Character LoRA (po natrénovaní)
+- Tvoja vlastná: luna23_v1.safetensors (alebo tvoj trigger)
+  Sila: 0.75 – 0.95
+
+## 6. Face Consistency
+- IP-Adapter FaceID Plus V2
+- InstantID (ak chceš ešte silnejší lock)
+
+## 7. Upscaler
+- 4x-UltraSharp alebo SeedVR2
+- UltimateSDUpscale
+
+## Odporúčané nastavenia generovania (Flux)
+- Steps: 20–28
+- Sampler: Euler / DPM++ 2M
+- CFG: 1.0 – 3.5 (Flux má nízke CFG)
+- Resolution: 896×1152 alebo 1024×1536 (portrait)
