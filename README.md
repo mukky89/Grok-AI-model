@@ -26,11 +26,28 @@ bash install.sh
 
 # 3. Stiahnutie Flux + text encoders + VAE
 bash download_models.sh
+
+# 4. Over súbory + štart ComfyUI
+bash scripts/verify_setup.sh
+bash scripts/start_comfyui.sh --tmux
 ```
 
 Potom stiahni **aidmaNSFWunlock** z Civitai (link v `models.txt`) do `models/loras/`.
 
-Reštartuj ComfyUI a môžeš generovať.
+Načítaj `workflows/flux_nsfw_basic.json` v ComfyUI (port 8188).
+
+---
+
+## Helper skripty
+
+Všetko spúšťaj cez `bash` (na RunPode je `/bin/sh` = dash).
+
+| Skript | Čo robí |
+|---|---|
+| `scripts/verify_setup.sh` | Skontroluje Flux UNET, CLIP, VAE, unlock LoRA, port 8188 |
+| `scripts/start_comfyui.sh` | Štart `0.0.0.0:8188` cez `.venv-cu128` |
+| `scripts/start_comfyui.sh --tmux` | To isté v tmux session `comfy` |
+| `scripts/prepare_dataset.sh` | Vytvorí `dataset/luna23/{portraits,half_body,full_body,nsfw}` |
 
 ---
 
@@ -39,21 +56,23 @@ Reštartuj ComfyUI a môžeš generovať.
 ```
 Grok-AI-model/
 ├── README.md
-├── install.sh              ← custom nodes
-├── download_models.sh      ← Flux + CLIP + VAE
-├── models.txt              ← zoznam + linky
+├── install.sh
+├── download_models.sh
+├── models.txt
+├── scripts/
+│   ├── verify_setup.sh
+│   ├── start_comfyui.sh
+│   └── prepare_dataset.sh
 ├── character/
-│   ├── description.md      ← popis modelky + trigger
-│   └── training_guide.md   ← ako natrénovať Character LoRA
+│   ├── description.md
+│   └── training_guide.md
 ├── prompts/
-│   ├── base_character.txt
-│   ├── sfw.txt
-│   ├── nsfw.txt
-│   └── negative.txt
-└── workflows/
-    ├── 01_flux_basic.md
-    ├── 02_character_consistency.md
-    └── 03_dataset_generator.md
+├── workflows/
+│   ├── flux_nsfw_basic.json
+│   ├── 01_flux_basic.md
+│   ├── 02_character_consistency.md
+│   └── 03_dataset_generator.md
+└── dataset/luna23/          ← vznikne po prepare_dataset.sh
 ```
 
 ---
