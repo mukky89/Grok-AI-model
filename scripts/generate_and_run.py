@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Vygeneruje NSFW prompt a rovno ho spustí v ComfyUI."""
+"""Vygeneruje glamour NSFW prompt a spustí ho v ComfyUI (predajový stack)."""
 
 from __future__ import annotations
 
@@ -8,7 +8,6 @@ import copy
 import json
 import sys
 import time
-import urllib.error
 import urllib.request
 from pathlib import Path
 
@@ -71,15 +70,20 @@ def saved_names(history_item: dict) -> list[str]:
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("-n", "--count", type=int, default=4)
-    p.add_argument("--explicit", choices=["soft", "nude", "explicit"], default="nude")
+    p.add_argument("--explicit", choices=["soft", "nude", "explicit"], default="soft")
     p.add_argument("--seed", type=int, default=None)
     p.add_argument("--host", default="http://127.0.0.1:8188")
     p.add_argument("--lora", default="aidmaNSFWunlock-FLUX-V0.2.safetensors")
-    p.add_argument("--guidance", type=float, default=2.8)
+    p.add_argument("--lora-strength", type=float, default=0.7)
+    p.add_argument("--lora2", default="")
+    p.add_argument("--lora2-strength", type=float, default=0.7)
+    p.add_argument("--guidance", type=float, default=3.2)
     p.add_argument("--steps", type=int, default=32)
     p.add_argument("--width", type=int, default=832)
     p.add_argument("--height", type=int, default=1216)
-    p.add_argument("--timeout", type=int, default=300)
+    p.add_argument("--sampler", default="dpmpp_2m")
+    p.add_argument("--scheduler", default="beta")
+    p.add_argument("--timeout", type=int, default=420)
     p.add_argument("--dry-run", action="store_true")
     args = p.parse_args()
 
@@ -94,13 +98,25 @@ def main() -> None:
     cap_dir.mkdir(parents=True, exist_ok=True)
 
     rng_seed = args.seed if args.seed is not None else int(time.time())
-    print(f"base={base}  count={args.count}  explicit={args.explicit}  seed0={rng_seed}")
+    print(
+        f"base={base} count={args.count} explicit={args.explicit} "
+        f"{args.width}x{args.height} {args.sampler}/{args.scheduler} g={args.guidance}"
+    )
 
     for i in range(args.count):
         seed = rng_seed + i
         pos, neg = build_prompt(args.explicit, seed=seed)
         wf = copy.deepcopy(template)
         wf["4"]["inputs"]["lora_name"] = args.lora
+        wf["4"]["inputs"]["strength_model"] = args.lora_strength
+        wf["4"]["inputs"]["strength_clip"] = args.lora_strength
+        if args.lora2:
+            wf["4b"]["inputs"]["lora_name"] = args.lora2
+            wf["4b"]["inputs"]["strength_model"] = args.lora2_strength
+            wf["4b"]["inputs"]["strength_clip"] = args.lora2_strength
+        else:
+            wf["4b"]["inputs"]["strength_model"] = 0.0
+            wf["4b"]["inputs"]["strength_clip"] = 0.0
         wf["5"]["inputs"]["text"] = pos
         wf["6"]["inputs"]["text"] = neg
         wf["7"]["inputs"]["guidance"] = args.guidance
@@ -108,12 +124,14 @@ def main() -> None:
         wf["8"]["inputs"]["height"] = args.height
         wf["9"]["inputs"]["seed"] = seed
         wf["9"]["inputs"]["steps"] = args.steps
-        wf["11"]["inputs"]["filename_prefix"] = f"luna23_{args.explicit}"
+        wf["9"]["inputs"]["sampler_name"] = args.sampler
+        wf["9"]["inputs"]["scheduler"] = args.scheduler
+        wf["11"]["inputs"]["filename_prefix"] = f"luna23_sale_{args.explicit}"
 
-        note = cap_dir / f"{args.explicit}_{seed}.txt"
+        note = cap_dir / f"sale_{args.explicit}_{seed}.txt"
         note.write_text(f"POSITIVE:\n{pos}\n\nNEGATIVE:\n{neg}\n", encoding="utf-8")
         print(f"\n[{i+1}/{args.count}] seed={seed}")
-        print(pos[:220] + "...")
+        print(pos[:200] + "...")
 
         if args.dry_run:
             continue
@@ -126,10 +144,10 @@ def main() -> None:
             print("CHYBA ComfyUI:", json.dumps(status, ensure_ascii=False)[:800])
             continue
         files = saved_names(item)
-        print("OK", ", ".join(files) if files else "hotovo (skontroluj ComfyUI/output)")
+        print("OK", ", ".join(files) if files else "hotovo")
 
     print("\noutput: /workspace/runpod-slim/ComfyUI/output/")
-    print(f"captions: {cap_dir}")
+    print("návod: workflows/06_sales_quality.md")
 
 
 if __name__ == "__main__":
