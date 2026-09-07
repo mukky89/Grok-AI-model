@@ -1,6 +1,6 @@
 # Grok AI Model – Realistic Flux Character (AI Modelka na predaj)
 
-Kompletný setup pre tvorbu **konzistentnej realistickej AI modelky** na **Flux.1 Dev** v ComfyUI.
+Kompletný setup pre tvorbu **konzistentnej realistickej AI modelky** na **Flux** v ComfyUI.
 
 **Charakteristika modelky:**
 - 23 rokov
@@ -8,8 +8,9 @@ Kompletný setup pre tvorbu **konzistentnej realistickej AI modelky** na **Flux.
 - Blond vlasy, cute, atraktívna
 - Nízka / petite
 - Mix SFW + NSFW
+- Trigger: `luna23`
 
-**Hardvér:** Optimalizované pre **RunPod A40 (48 GB VRAM)**
+**Hardvér:** RunPod A40 (48 GB VRAM) alebo RTX 4090 fp8
 
 ---
 
@@ -31,11 +32,26 @@ bash scripts/runpod.sh start     # ComfyUI v tmux na 8188
 bash scripts/runpod.sh status    # žije?
 ```
 
+SSH a denné príkazy: [`docs/runpod-ssh.md`](docs/runpod-ssh.md)
+
 Potom stiahni **aidmaNSFWunlock** z Civitai (link v `models.txt`) do `models/loras/`.
 
 Načítaj `workflows/flux_nsfw_basic.json`. Najprv portréty, až potom full body.
 
 UI: `https://POD_ID-8188.proxy.runpod.net`
+
+---
+
+## Dokumentácia z tohto setupu
+
+| Súbor | Čo |
+|---|---|
+| [`docs/stack.md`](docs/stack.md) | Flux vs Pony vs SDXL — čo vyzerá ako reálna fotka |
+| [`docs/sales-workflow.md`](docs/sales-workflow.md) | Denný predajný pipeline, Set 01, quality gate |
+| [`docs/runpod-ssh.md`](docs/runpod-ssh.md) | SSH, volume, start/stop |
+| [`workflows/07_sales_pipeline.md`](workflows/07_sales_pipeline.md) | Krátky predajný postup |
+| [`character/description.md`](character/description.md) | Char sheet |
+| [`character/training_guide.md`](character/training_guide.md) | Character LoRA |
 
 ---
 
@@ -56,21 +72,22 @@ Všetko spúšťaj cez `bash` (na RunPode je `/bin/sh` = dash).
 
 ## Odporúčaný postup (najlepšia kvalita na predaj)
 
-1. Vygeneruj **dataset 40–80 fotiek** (FaceID + base prompt)
-2. Natrénuj **Character LoRA** (návod v `character/training_guide.md`)
-3. Používaj **Character LoRA + FaceID + aidmaNSFWunlock**
-4. Generuj SFW + NSFW packy
+1. Vygeneruj **dataset 40–80 fotiek** (najprv tvár)
+2. Natrénuj **Character LoRA** (`character/training_guide.md`)
+3. Používaj **Character LoRA + aidmaNSFWunlock** (max 2 extra LoRA)
+4. Generuj SFW + NSFW packy podľa `docs/sales-workflow.md`
+5. Video len I2V z vybranej fotky, nie text-to-video
 
 ---
 
 ## Dôležité nastavenia Flux
 
-- Steps: 20–28
-- Sampler: euler
+- Draft: 28 steps, CFG 3.2, 768×1152
+- Finále: 32–36 steps, 896×1152
+- Sampler na predaj: DPM++ 2M + beta (staré workflow môže mať euler — na look skús oba)
 - Guidance: 2.5–3.5
-- Resolution: 896×1152 alebo 1024×1536
-- NSFW unlock strength: 0.7–0.9
-- Character LoRA strength: 0.8–0.95
+- NSFW unlock: 0.7–0.9
+- Character LoRA: 0.8–0.95
 
 ---
 
