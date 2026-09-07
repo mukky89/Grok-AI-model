@@ -2,40 +2,14 @@
 set -euo pipefail
 
 # Grok AI Model – jeden vstupný skript pre RunPod A40
-# Použitie (vždy cez bash, nie sh):
-#   bash /workspace/Grok-AI-model/scripts/runpod.sh
-#   bash /workspace/Grok-AI-model/scripts/runpod.sh start
-#   bash /workspace/Grok-AI-model/scripts/runpod.sh status
-#   bash /workspace/Grok-AI-model/scripts/runpod.sh stop
-#   bash /workspace/Grok-AI-model/scripts/runpod.sh pull
-#   bash /workspace/Grok-AI-model/scripts/runpod.sh setup
+#   bash scripts/runpod.sh setup|start|stop|status|pull|sync
 
-REPO_URL="https://github.com/mukky89/Grok-AI-model.git"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+# shellcheck source=common.sh
+source "$SCRIPT_DIR/common.sh"
+
 REPO_DIR="/workspace/Grok-AI-model"
 CMD="${1:-setup}"
-
-find_comfy() {
-  if [ -d "/workspace/runpod-slim/ComfyUI" ]; then
-    echo "/workspace/runpod-slim/ComfyUI"
-  elif [ -d "/workspace/ComfyUI" ]; then
-    echo "/workspace/ComfyUI"
-  else
-    echo ""
-  fi
-}
-
-find_python() {
-  local comfy="$1"
-  if [ -x "$comfy/.venv-cu128/bin/python" ]; then
-    echo "$comfy/.venv-cu128/bin/python"
-  elif [ -x "$comfy/venv/bin/python" ]; then
-    echo "$comfy/venv/bin/python"
-  elif command -v python3 >/dev/null 2>&1; then
-    command -v python3
-  else
-    echo ""
-  fi
-}
 
 ensure_repo() {
   if [ ! -d "$REPO_DIR/.git" ]; then
@@ -70,6 +44,13 @@ comfy_status() {
   echo
   echo "=== tmux ==="
   tmux ls 2>/dev/null || echo "žiadna tmux session"
+  echo
+  echo "=== workflows v Comfy user ==="
+  local comfy
+  comfy="$(find_comfy)"
+  if [ -n "$comfy" ]; then
+    ls -1 "$comfy/user/default/workflows"/*.json 2>/dev/null || echo "žiadne JSON (spusti: bash scripts/runpod.sh sync)"
+  fi
 }
 
 start_comfy() {
@@ -130,6 +111,10 @@ stop_comfy() {
   pkill -f "main.py --listen" 2>/dev/null || true
 }
 
+sync_all() {
+  bash "$REPO_DIR/scripts/sync_to_comfy.sh"
+}
+
 run_setup() {
   pull_repo
   cd "$REPO_DIR"
@@ -143,19 +128,15 @@ run_setup() {
   echo ">>> verify_setup.sh"
   bash "$REPO_DIR/scripts/verify_setup.sh" || true
 
-  echo ">>> prepare_dataset.sh"
-  bash "$REPO_DIR/scripts/prepare_dataset.sh"
-
-  echo ">>> apply_fullbody_workflow.sh"
-  bash "$REPO_DIR/scripts/apply_fullbody_workflow.sh" || true
+  echo ">>> sync_to_comfy.sh"
+  sync_all
 
   start_comfy
 
   echo
   echo "=============================================="
   echo "  Setup hotový"
-  echo "  Load v ComfyUI: workflows/flux_nsfw_basic.json"
-  echo "  Portréty najprv, full body až po referenčnej tvári."
+  echo "  Workflows sú v ComfyUI/user/default/workflows"
   echo "  Dataset: $REPO_DIR/dataset/luna23"
   echo "=============================================="
 }
@@ -166,8 +147,9 @@ case "$CMD" in
   stop)   stop_comfy ;;
   status) comfy_status ;;
   pull)   pull_repo ;;
+  sync)   pull_repo; sync_all; comfy_status ;;
   *)
-    echo "Použitie: bash scripts/runpod.sh [setup|start|stop|status|pull]"
+    echo "Použitie: bash scripts/runpod.sh [setup|start|stop|status|pull|sync]"
     exit 1
     ;;
 esac
