@@ -1,46 +1,30 @@
-# Character Description – AI Modelka
+# Character – Alina (`alina23`)
 
-**Meno (návrh):** Luna / Sofia / Emma (vyber si a používaj konzistentne)
+Referenčný look: teplé hotelové svetlo, špinavá blond s tmavším koreňom, lieskovo-zelené oči, prirodzený úsmev, saténová košieľka.
 
-### Základný popis (používaj v každom prompte)
+## Lock (nemeniť)
 
-```
-23 year old European woman, young adult, blonde hair, long straight blonde hair, cute face, attractive, beautiful, petite, short height, slim body, fair skin, natural beauty, soft features, big eyes, cute smile
-```
+- vekový dojem: mid-20s
+- vlasy: dirty blonde, darker roots, honey ends, long, mostly straight
+- oči: hazel / green-brown (NIE ice blue)
+- koža: warm fair, visible pores, slight flush
+- tvár: oval, soft cheekbones, natural teeth when smiling
+- telo: slim, natural chest, not bodybuilder, not ultra-petite doll
+- izba: one warm hotel room — wood bed, cream upholstered chair, bedside lamp tungsten
 
-### Rozšírený popis (pre lepšiu konzistenciu)
-
-```
-23 years old, European ethnicity, Northern/Central European features, long blonde hair, soft natural makeup, cute and attractive face, petite frame, short stature, slim waist, natural breasts, fair skin with light freckles optional, youthful appearance, innocent yet seductive look
-```
-
-### Trigger words pre Character LoRA (po natrénovaní)
-
-Odporúčané trigger words:
-- `luna23` alebo `sofia_blonde` alebo `emma_cute`
-- `ohwx woman` (klasický)
-- `sks woman`
-
-**Odporúčanie:** Použi krátky unikátny token, napr. `luna23`.
-
-### Body type keywords
-
-- petite, short, slim, delicate frame
-- natural proportions
-- youthful body
-
-### Hair
-
-- long straight blonde hair
-- soft blonde hair
-- honey blonde / platinum blonde (vyber jeden a drž sa ho)
-
-### Eye color (vyber a drž)
-
-Odporúčané: light blue eyes / green eyes / hazel eyes
-
-### Negative (vždy)
+## Prompt blok
 
 ```
-old, aged, wrinkles, chubby, tall, muscular, asian, dark skin, black hair, brown hair, freckles heavy, oversaturated, plastic skin
+alina23, candid photograph of the same woman, dirty blonde hair darker roots honey ends,
+hazel green-brown eyes, warm fair skin with pores, oval face, natural smile,
+slim body, same hotel bedroom, warm lamp light, 35mm, subtle film grain
 ```
+
+## Negative extra
+
+```
+ice blue eyes, platinum blonde, instagram face, different woman, plastic skin,
+studio beauty dish, black lace catalog pose, child, teen
+```
+
+Trigger po LoRA: `alina23`
