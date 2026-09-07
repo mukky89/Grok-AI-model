@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Grok AI Model – jeden vstupný skript pre RunPod A40
-#   bash scripts/runpod.sh setup|start|stop|status|pull|sync
+#   bash scripts/runpod.sh setup|start|stop|status|pull|sync|models
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=common.sh
@@ -115,6 +115,10 @@ sync_all() {
   bash "$REPO_DIR/scripts/sync_to_comfy.sh"
 }
 
+fetch_models() {
+  bash "$REPO_DIR/scripts/fetch_missing.sh"
+}
+
 run_setup() {
   pull_repo
   cd "$REPO_DIR"
@@ -124,6 +128,9 @@ run_setup() {
 
   echo ">>> download_models.sh"
   bash "$REPO_DIR/download_models.sh" || true
+
+  echo ">>> fetch_missing.sh"
+  fetch_models || true
 
   echo ">>> verify_setup.sh"
   bash "$REPO_DIR/scripts/verify_setup.sh" || true
@@ -148,8 +155,9 @@ case "$CMD" in
   status) comfy_status ;;
   pull)   pull_repo ;;
   sync)   pull_repo; sync_all; comfy_status ;;
+  models) pull_repo; fetch_models ;;
   *)
-    echo "Použitie: bash scripts/runpod.sh [setup|start|stop|status|pull|sync]"
+    echo "Použitie: bash scripts/runpod.sh [setup|start|stop|status|pull|sync|models]"
     exit 1
     ;;
 esac
