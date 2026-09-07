@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Grok AI Model – jeden vstupný skript pre RunPod A40
-#   bash scripts/runpod.sh setup|start|stop|status|pull|sync|models
+#   bash scripts/runpod.sh setup|start|stop|status|pull|sync|models|batch [N]
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=common.sh
@@ -10,6 +9,7 @@ source "$SCRIPT_DIR/common.sh"
 
 REPO_DIR="/workspace/Grok-AI-model"
 CMD="${1:-setup}"
+ARG2="${2:-}"
 
 ensure_repo() {
   if [ ! -d "$REPO_DIR/.git" ]; then
@@ -49,7 +49,7 @@ comfy_status() {
   local comfy
   comfy="$(find_comfy)"
   if [ -n "$comfy" ]; then
-    ls -1 "$comfy/user/default/workflows"/*.json 2>/dev/null || echo "žiadne JSON (spusti: bash scripts/runpod.sh sync)"
+    ls -1 "$comfy/user/default/workflows"/*.json 2>/dev/null || echo "žiadne JSON"
   fi
 }
 
@@ -74,30 +74,22 @@ start_comfy() {
   fi
 
   if tmux has-session -t comfy 2>/dev/null; then
-    echo "Session comfy existuje, ale port neodpovedá — restart."
     tmux kill-session -t comfy || true
     sleep 1
   fi
 
   echo ">>> štart ComfyUI"
-  echo "    dir: $comfy"
-  echo "    py:  $py"
   tmux new-session -d -s comfy "cd '$comfy' && '$py' main.py --listen 0.0.0.0 --port 8188; echo EXIT:$?; sleep 30"
 
-  echo "čakám na port 8188..."
   local i
   for i in $(seq 1 30); do
     if curl -sS -m 2 http://127.0.0.1:8188/system_stats >/dev/null 2>&1; then
       echo "OK ComfyUI žije."
-      echo "UI: https://POD_ID-8188.proxy.runpod.net"
-      echo "log: tmux attach -t comfy"
       return 0
     fi
     sleep 2
   done
-
-  echo "VAROVANIE: port 8188 po 60s neodpovedá. Pozri log:"
-  echo "  tmux attach -t comfy"
+  echo "VAROVANIE: port 8188 neodpovedá. tmux attach -t comfy"
   return 1
 }
 
@@ -119,33 +111,20 @@ fetch_models() {
   bash "$REPO_DIR/scripts/fetch_missing.sh"
 }
 
+run_batch() {
+  local n="${ARG2:-4}"
+  bash "$REPO_DIR/scripts/batch_portraits.sh" "$n"
+}
+
 run_setup() {
   pull_repo
   cd "$REPO_DIR"
-
-  echo ">>> install.sh"
   bash "$REPO_DIR/install.sh" || true
-
-  echo ">>> download_models.sh"
   bash "$REPO_DIR/download_models.sh" || true
-
-  echo ">>> fetch_missing.sh"
   fetch_models || true
-
-  echo ">>> verify_setup.sh"
   bash "$REPO_DIR/scripts/verify_setup.sh" || true
-
-  echo ">>> sync_to_comfy.sh"
   sync_all
-
   start_comfy
-
-  echo
-  echo "=============================================="
-  echo "  Setup hotový"
-  echo "  Workflows sú v ComfyUI/user/default/workflows"
-  echo "  Dataset: $REPO_DIR/dataset/luna23"
-  echo "=============================================="
 }
 
 case "$CMD" in
@@ -156,8 +135,10 @@ case "$CMD" in
   pull)   pull_repo ;;
   sync)   pull_repo; sync_all; comfy_status ;;
   models) pull_repo; fetch_models ;;
+  batch)  pull_repo; run_batch ;;
   *)
-    echo "Použitie: bash scripts/runpod.sh [setup|start|stop|status|pull|sync|models]"
+    echo "Použitie: bash scripts/runpod.sh [setup|start|stop|status|pull|sync|models|batch]"
+    echo "  batch [N]  N portrétov cez API (default 4)"
     exit 1
     ;;
 esac
