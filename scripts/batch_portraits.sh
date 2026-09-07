@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Prvý dataset batch cez Comfy API, bez UI.
-#   bash scripts/batch_portraits.sh
-#   bash scripts/batch_portraits.sh 8
-
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 # shellcheck source=common.sh
 source "$SCRIPT_DIR/common.sh"
@@ -15,7 +11,15 @@ COMFY="$(find_comfy)"
 PY="$(find_python "$COMFY")"
 PY="${PY:-python3}"
 
-echo ">>> Comfy API batch portraits n=$COUNT"
+REF="$COMFY/input/alina_v3_reference_001.png"
+KEEP="$REPO_DIR/dataset_keep/alina_ref.png"
+mkdir -p "$REPO_DIR/dataset_keep"
+if [ -f "$REF" ] && [ ! -f "$KEEP" ]; then
+  cp -f "$REF" "$KEEP"
+  echo "ref: $KEEP"
+fi
+
+echo ">>> Alina batch n=$COUNT  lora=alina_v6 + unlock"
 "$PY" "$REPO_DIR/scripts/generate_and_run.py" \
   -n "$COUNT" \
   --explicit soft \
@@ -26,10 +30,7 @@ echo ">>> Comfy API batch portraits n=$COUNT"
   --sampler dpmpp_2m \
   --scheduler beta \
   --lora aidmaNSFWunlock-FLUX-V0.2.safetensors \
-  --lora-strength 0.8 \
+  --lora-strength 0.75 \
+  --lora2 alina_v6.safetensors \
+  --lora2-strength 0.9 \
   --timeout 600
-
-echo
-echo "výstup: $COMFY/output/"
-echo "presuň dobré tváre:"
-echo "  cp $COMFY/output/luna23_sale_soft* $REPO_DIR/dataset/luna23/portraits/"
