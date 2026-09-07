@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Overí, či sú na RunPode všetky súbory pre Flux Luna23 workflow.
-
 ok=0
 fail=0
 
@@ -33,46 +31,33 @@ fi
 echo "ComfyUI: $COMFY"
 echo
 
+bytes_of() { stat -c%s "$1" 2>/dev/null || echo 0; }
+
 check_file() {
   local path="$1"
   local label="$2"
-  if [ -f "$path" ]; then
-    echo "OK   $label"
+  local min="${3:-1}"
+  if [ -f "$path" ] && [ "$(bytes_of "$path")" -ge "$min" ]; then
+    echo "OK   $label  ($(du -h "$path" | cut -f1))"
     echo "     $path"
     ok=$((ok + 1))
   else
     echo "CHYBA $label"
-    echo "     chýba: $path"
+    echo "     $path  size=$(bytes_of "$path")"
     fail=$((fail + 1))
   fi
 }
 
-check_file "$MODELS/unet/flux1-dev-fp8.safetensors" "Flux UNET FP8"
-check_file "$MODELS/clip/t5xxl_fp8_e4m3fn.safetensors" "T5 XXL FP8"
-check_file "$MODELS/clip/clip_l.safetensors" "CLIP-L"
-check_file "$MODELS/vae/ae.safetensors" "Flux VAE"
+check_file "$MODELS/unet/flux1-dev-fp8.safetensors" "Flux UNET FP8" 1000000000
+check_file "$MODELS/clip/t5xxl_fp8_e4m3fn.safetensors" "T5 XXL FP8" 1000000
+check_file "$MODELS/clip/clip_l.safetensors" "CLIP-L" 1000000
+check_file "$MODELS/vae/ae.safetensors" "Flux VAE" 1000000
 
-# LoRA názov z workflows/flux_nsfw_basic.json
 LORA_UNLOCK="$MODELS/loras/aidmaNSFWunlock-FLUX-V0.2.safetensors"
-if [ -f "$LORA_UNLOCK" ]; then
-  check_file "$LORA_UNLOCK" "aidmaNSFWunlock LoRA"
-else
-  # ak má iný názov, aspoň upozorni
-  if ls "$MODELS/loras/"*aidma* >/dev/null 2>&1; then
-    echo "OK   aidmaNSFWunlock (iný názov súboru)"
-    ls -1 "$MODELS/loras/"*aidma*
-    ok=$((ok + 1))
-  else
-    echo "CHYBA aidmaNSFWunlock LoRA"
-    echo "     daj do $MODELS/loras/ súbor:"
-    echo "     aidmaNSFWunlock-FLUX-V0.2.safetensors"
-    echo "     https://civitai.com/models/674027"
-    fail=$((fail + 1))
-  fi
-fi
+check_file "$LORA_UNLOCK" "aidmaNSFWunlock LoRA" 1000000
 
 CHAR_LORA="$MODELS/loras/luna23_v1.safetensors"
-if [ -f "$CHAR_LORA" ]; then
+if [ -f "$CHAR_LORA" ] && [ "$(bytes_of "$CHAR_LORA")" -ge 1000000 ]; then
   echo "OK   Character LoRA luna23_v1"
   ok=$((ok + 1))
 else
