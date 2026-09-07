@@ -14,7 +14,7 @@ config:
       save:
         dtype: float16
         save_every: 250
-        max_step_saves_to_keep: 8
+        max_step_saves_to_keep: 10
         push_to_hub: false
       datasets:
         - folder_path: "/workspace/ai-studio-tools/lora_dataset/alina_v2/img"
@@ -25,7 +25,7 @@ config:
           resolution: [512, 768, 1024]
       train:
         batch_size: 1
-        steps: 2500
+        steps: 4000
         gradient_accumulation_steps: 1
         train_unet: true
         train_text_encoder: false
@@ -43,14 +43,13 @@ config:
         quantize: true
       sample:
         sampler: "flowmatch"
-        sample_every: 250
+        sample_every: 500
         sample_start_step: 0
         width: 768
         height: 1152
         prompts:
-          - "alina23, portrait, dirty blonde hair darker roots, hazel green-brown eyes, warm lamp light, looking at camera"
-          - "alina23, sitting on a cream chair in a hotel bedroom, champagne slip dress, black fishnets, 35mm"
-          - "alina23, close-up face, natural smile, visible pores, same woman"
+          - "alina23, portrait, dirty blonde hair darker roots, hazel green-brown eyes, warm lamp light"
+          - "alina23, sitting on a cream chair in a hotel bedroom, champagne slip, 35mm"
         neg: ""
         seed: 42
         walk_seed: true
