@@ -6,62 +6,75 @@ import random
 from pathlib import Path
 
 IDENTITY = (
-    "alina23, aidmaNSFWunlock, candid photograph of one 23 year old european woman, "
-    "the same woman every time, dirty blonde hair with darker roots and honey ends, "
-    "long mostly straight hair, hazel green-brown eyes, warm fair skin, oval face, "
-    "soft natural smile, slim body, natural proportions"
-)
-
-EYES = (
-    "hazel green-brown irises, both eyes same color, sharp nearest eye, no ice blue eyes"
+    "alina23, aidmaNSFWunlock, photorealistic photograph of one 23 year old european woman, "
+    "dirty blonde hair with darker roots and honey ends, hazel green-brown eyes, "
+    "warm fair skin with visible pores, slim legs, same woman"
 )
 
 SKIN = (
-    "visible pores, faint natural flush, tiny imperfections, not airbrushed, not plastic"
+    "natural skin texture on thighs where the stocking welt presses, "
+    "faint fabric imprint, no plastic skin, no beauty filter"
 )
 
 EXPLICIT = {
-    "soft": (
-        "champagne satin slip dress and black fishnet tights, relaxed sitting pose, "
-        "intimate but not catalog lingerie ad"
-    ),
-    "nude": (
-        "same woman, topless, natural breasts, warm lamp light, tasteful not clinical"
-    ),
-    "explicit": (
-        "same woman, nude, natural body, warm bedroom light, intimate photograph"
-    ),
+    "soft": "mini skirt and lingerie, erotic but clothed",
+    "nude": "topless, skirt hiked, stockings stay on",
+    "explicit": "nude except stockings and heels, intimate photograph",
 }
 
+STOCKINGS = [
+    "matte 20-denier nude hold-ups with a wide opaque welt and silicone inner grip dots clearly visible on the inner welt",
+    "sheer black hold-ups, 15 denier, deep lace band, silicone gripper strip along the inside of the band",
+    "seamed black stockings attached to a thin satin garter belt, metal clips and rubber grips on the welt, back seam straight down the calf",
+    "champagne hold-ups, reinforced heel and toe, lace top sitting mid-thigh, no sagging",
+    "dark navy hold-ups with a decorative baroque lace band and visible silicone nubs",
+    "plain nude stay-ups, wide comfort welt, slight shine only on the shin, matte on the thigh",
+]
+
+GARTERS = [
+    "black satin garter belt with four straps hanging straight, clips fastened on the stocking welt",
+    "narrow nude garter belt under a mini skirt, straps peeking below the hem",
+    "no garter belt, hold-ups only, welt doing all the work",
+    "red satin garter belt, gold hardware, two straps per thigh",
+]
+
+HEELS = [
+    "black pointed-toe stiletto pumps, 10cm heel, thin stiletto, glossy patent, closed back, thin sole, heel sitting under the ankle not a block",
+    "nude patent pointed pumps, stiletto heel, almond-pointed toe, ankle strap off",
+    "black suede pointed courts, slim heel, no platform, no chunky sole",
+    "burgundy leather pumps, needle heel, sharp toe, visible heel cap and outsole edge",
+]
+
 OUTFITS = [
-    "champagne silk slip on a cream upholstered wooden chair",
-    "oversized white shirt, same bedroom lamp",
-    "beige satin slip, black fishnets, barefoot",
-    "simple nude-toned lingerie, no heavy lace catalog set",
+    "very short black mini skirt, hem at upper thigh, stockings showing below the hem",
+    "tight grey mini skirt riding up when she sits, hold-up welt visible",
+    "black mini skirt and a fitted blouse, skirt just covering the garter clips",
+    "micro mini, sitting so the lace tops show",
 ]
 
 POSES = [
-    "sitting on the cream chair, body angled, looking off camera with a small smile",
-    "sitting on the chair, hands on thighs, soft eye contact",
-    "perched on the chair edge, relaxed shoulders, 35mm crop mid-thigh to hair",
-    "same chair, leaning forward slightly, natural unposed hands",
+    "standing three-quarter, one knee soft, feet in the pumps planted, skirt hem and stocking tops in frame",
+    "sitting on a chair edge, knees together then slightly apart, heels on the floor, welt and clips sharp",
+    "leaning on a dresser, one foot on tiptoe in the pump, seam or welt in focus",
+    "walking pose, weight on the back heel, front pump pointed, stockings taut",
 ]
 
 PLACES = [
-    "the same warm hotel bedroom, dark wood four-poster bed, cream chair, "
-    "tungsten bedside lamp, cream walls, patterned rug, quiet evening light"
+    "the same warm hotel bedroom, wood floor, lamp light, full length in frame",
+    "hotel corridor carpet, warm practicals, full legs visible",
 ]
 
 CAMERAS = [
-    "35mm photograph, f/2.2, window plus lamp mix, subtle film grain, shallow depth of field",
-    "candid still, focus on the nearest eye, background lamp bokeh",
+    "50mm photograph, f/2.8, focus on the stocking welt and the nearest pump, sharp fabric knit and heel silhouette",
+    "35mm full-body, both shoes complete in frame, no cropped toes, no cropped head",
 ]
 
 NEGATIVE = (
-    "ice blue eyes, platinum blonde, different woman, instagram face, doll face, "
-    "plastic skin, airbrushed, beauty filter, cgi, 3d, anime, studio octabox, "
-    "black lace catalog, city penthouse, marble bathroom, red velvet set, "
-    "child, teen, underage, extra fingers, extra limbs, watermark, text"
+    "ice blue eyes, platinum blonde, different woman, plastic skin, cgi, 3d, anime, "
+    "platform shoes, chunky heel, block heel, wedge, sneakers, barefoot, no shoes, "
+    "sagging stockings, wrinkled nylon puddle, missing welt, floating straps, "
+    "deformed shoes, melted heels, extra heels, two left feet, cropped feet, cropped toes, "
+    "cropped head, extra legs, child, teen, watermark"
 )
 
 
@@ -69,35 +82,31 @@ def build_prompt(explicit: str, seed: int | None = None) -> tuple[str, str]:
     rng = random.Random(seed)
     parts = [
         IDENTITY,
-        EYES,
         rng.choice(POSES),
-        EXPLICIT[explicit],
+        EXPLICIT.get(explicit, EXPLICIT["soft"]),
         rng.choice(OUTFITS),
+        rng.choice(STOCKINGS),
+        rng.choice(GARTERS),
+        rng.choice(HEELS),
+        "nylon knit visible, welt edge sharp, stiletto is a thin rod not a wedge",
         SKIN,
-        PLACES[0],
+        rng.choice(PLACES),
         rng.choice(CAMERAS),
     ]
     return ", ".join(parts), NEGATIVE
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-n", "--count", type=int, default=10)
-    parser.add_argument("--explicit", choices=sorted(EXPLICIT), default="soft")
-    parser.add_argument("--seed", type=int, default=None)
-    parser.add_argument("-o", "--out", type=Path, default=None)
-    args = parser.parse_args()
+    p = argparse.ArgumentParser()
+    p.add_argument("-n", "--count", type=int, default=8)
+    p.add_argument("--explicit", choices=sorted(EXPLICIT), default="soft")
+    p.add_argument("--seed", type=int, default=None)
+    args = p.parse_args()
     rng = random.Random(args.seed)
-    lines = []
     for i in range(args.count):
         s = rng.randint(1, 10_000_000)
         pos, neg = build_prompt(args.explicit, seed=s)
-        lines.append(f"# {i+1} seed={s}\nPOSITIVE:\n{pos}\n\nNEGATIVE:\n{neg}\n" + "-" * 72 + "\n")
-    text = "\n".join(lines)
-    print(text)
-    if args.out:
-        args.out.parent.mkdir(parents=True, exist_ok=True)
-        args.out.write_text(text, encoding="utf-8")
+        print(f"# {i+1} seed={s}\nPOSITIVE:\n{pos}\n\nNEGATIVE:\n{neg}\n" + "-" * 72)
 
 
 if __name__ == "__main__":
