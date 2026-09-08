@@ -1,107 +1,104 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import argparse
 import random
 
 IDENTITY = (
-    "alina23, aidmaNSFWunlock, photorealistic erotic photograph of one 23 year old european woman, "
-    "dirty blonde hair darker roots honey ends, hazel green-brown eyes, warm fair skin, slim legs"
+    "aidmaNSFWunlock, candid raw photograph of one ordinary 24 year old slavic woman, "
+    "not a model, slightly long oval face, soft jaw, small natural nose with a tiny bump, "
+    "light brown hair with grown-out roots, loose messy waves to the chest, "
+    "hazel eyes a bit close together, faint undereye, sparse brows, "
+    "thin upper lip, uneven real teeth when she smiles, "
+    "warm skin with pores, a few freckles on the nose, no glam makeup"
 )
 
 EXPLICIT = {
-    "soft": "provocative outfit, cleavage, short hem, stockings and heels",
-    "nude": "topless, bare breasts and nipples, bottom still on or pulled aside",
+    "soft": "short provocative clothes, cleavage, stockings and heels",
+    "nude": (
+        "topless, both breasts fully bare, natural round areolas, "
+        "two intact nipples not melted, no bra, no hands covering chest"
+    ),
     "explicit": (
-        "nude breasts and visible vulva, no panties, stockings and stiletto pumps stay on"
+        "completely nude except hold-up stockings and stiletto pumps, "
+        "no panties, no skirt covering the groin, "
+        "camera pointed at the pelvis from slightly below, "
+        "knees open toward the lens, vulva and labia in the center of the frame, "
+        "bare breasts with natural hang and two clear nipples"
     ),
 }
 
 OUTFITS = {
     "soft": [
-        "tiny black mini skirt and unbuttoned white blouse, bra showing",
-        "red bodycon mini dress cut very short, zipper down the front",
-        "black leather mini and a cropped tank, midriff bare",
-        "school-style but adult: short grey pleated mini, white shirt knotted under the bust",
-        "satin slip dress riding up, thin straps falling",
-        "tight beige knit mini, no underwear line, nipples under the knit",
-        "open silk robe over a black thong and hold-ups",
-        "secretary look: white blouse half open, black pencil skirt hiked to the welt",
-        "wet-look black mini and a tiny bikini top",
-        "gold sequin micro mini, no bra, hard nipples under the fabric",
+        "cheap black mini from a night out, hem riding up",
+        "washed-out red bodycon, stretched at the bust",
+        "white shirt half unbuttoned, black mini, office after hours",
+        "satin slip that clings and shows the welt",
+        "open hotel robe, thong, hold-ups",
+        "leather-look mini and a thin tank, nipples under the tank",
     ],
     "nude": [
-        "mini skirt only, no top, breasts bare",
-        "open robe, nothing under it except stockings",
-        "skirt around the waist, chest nude",
-        "tied shirt off the shoulders, breasts out, mini still on",
+        "no top, only a pulled-up mini",
+        "robe off the shoulders, chest bare",
+        "skirt around the waist, breasts free",
     ],
     "explicit": [
-        "nothing on the torso or groin except garter or hold-ups and pumps",
-        "robe open and off the shoulders, fully nude front",
-        "mini skirt lifted and no panties",
-        "only a garter belt, stockings and heels",
+        "no clothing on torso or groin",
+        "garter belt only plus stockings and pumps",
+        "hold-ups and heels only",
     ],
 }
 
 STOCKINGS = [
-    "nude 20-den hold-ups, wide welt, silicone dots inside",
-    "black 15-den hold-ups, deep lace band, silicone strip",
-    "seamed stockings on a garter belt, clips on the welt, back seam",
-    "champagne hold-ups, reinforced heel and toe",
-    "wine-red stay-ups, baroque lace top",
-    "plain matte black opaques with a simple welt",
-    "fishnet hold-ups with a solid lace band",
+    "real nylon hold-ups: knit visible, wide opaque welt, silicone gripper dots on the inner band",
+    "15-den black sheers, lace welt tight mid-thigh, no wrinkles at the knee",
+    "seamed stockings, back seam straight, metal garter clips on the welt",
+    "nude stay-ups, matte thigh, sheen only on the shin, reinforced toe in the pump",
 ]
 
 GARTERS = [
-    "black satin garter belt, four straps",
-    "nude garter belt under the hem",
-    "red garter, gold clips",
-    "hold-ups only, no belt",
+    "thin black garter belt, four straps hanging straight, clips closed",
+    "hold-ups only, welt doing the work, no belt",
+    "narrow nude belt under nothing else",
 ]
 
 HEELS = [
-    "black patent pointed stilettos, 10cm needle heel, no platform",
-    "nude patent pumps, sharp toe",
-    "black suede courts, slim heel",
-    "red patent pointed pumps",
-    "ankle-strap stilettos, thin strap, still a pump toe",
+    "scuffed black pointed stilettos, thin 9cm heel, no platform, both shoes fully in frame",
+    "nude patent pumps, sharp toe, needle heel under the ankle",
+    "worn black suede courts, slim heel, heel cap visible",
 ]
 
 POSES = {
     "soft": [
-        "standing in a doorway, hip out, one knee bent",
-        "sitting on the chair arm, skirt riding up",
-        "leaning on the dresser, looking back over the shoulder",
-        "walking toward camera, short steps in the pumps",
-        "perched on the bed edge, knees together",
+        "standing in a hotel room, phone-photo awkward stance",
+        "sitting on the bed edge, skirt short, feet in pumps",
+        "leaning on a dresser, looking back",
     ],
     "nude": [
-        "sitting, blouse off, chest to camera",
-        "standing at the window side-on, topless",
-        "on all fours on the bed, looking at camera, breasts hanging",
-        "kneeling on the chair, topless",
+        "sitting topless, shoulders relaxed, not posing like a catalog",
+        "standing side-on by a window, breasts natural",
     ],
     "explicit": [
-        "sitting, knees open, vulva visible, heels on the floor",
-        "on the bed, knees up, nude plus stockings",
-        "standing with one foot on the chair, nude front",
-        "lying back, legs apart, pumps on",
-        "bent forward on the dresser, looking back, groin readable",
+        "sitting on the bed facing camera, knees pulled apart, pelvis forward, heels on the floor",
+        "lying back, camera between the knees, vulva sharp in the foreground, face still visible",
+        "on the chair, feet on the seat posts, groin open to camera",
+        "low angle from the foot of the bed, legs spread, stockings and pumps framing the vulva",
     ],
 }
 
 PLACES = [
-    "hotel bedroom, lamp, wood floor",
-    "hotel suite living room, low sofa",
-    "bathroom doorway, warm light",
-    "bed with rumpled white sheets",
+    "messy hotel room, cheap lamp, wrinkled sheets, afternoon window",
+    "small bedroom, radiator, curtain half drawn",
 ]
 
 NEGATIVE = (
-    "child, teen, underage, different woman, plastic skin, cgi, anime, "
-    "platform sole, block heel, sneakers, barefoot, sagging stockings, "
-    "cropped head, cropped feet, extra legs, watermark, mosaic censor"
+    "instagram model, beauty filter, plastic skin, doll face, perfect symmetry, "
+    "catalog lighting, octabox, glued-on makeup, ice-blue eyes, platinum hair, "
+    "deformed nipples, extra nipples, melted nipples, blob areolas, misplaced nipples, "
+    "panties covering the groin, thong covering the vulva, censored, mosaic, "
+    "closed legs hiding the groin, standing pose that hides genitals, "
+    "platform shoes, block heel, sneakers, barefoot, sagging stockings, "
+    "cgi, 3d, anime, child, teen, watermark, cropped head, cropped feet"
 )
 
 
@@ -117,6 +114,23 @@ def build_prompt(explicit: str, seed: int | None = None) -> tuple[str, str]:
         rng.choice(GARTERS),
         rng.choice(HEELS),
         rng.choice(PLACES),
-        "photorealistic, 35mm, full body, both shoes in frame",
+        "shot on a 35mm lens, slight grain, imperfect framing, photoreal",
     ]
     return ", ".join(parts), NEGATIVE
+
+
+def main() -> None:
+    p = argparse.ArgumentParser()
+    p.add_argument("-n", type=int, default=8)
+    p.add_argument("--explicit", choices=sorted(EXPLICIT), default="explicit")
+    p.add_argument("--seed", type=int, default=None)
+    args = p.parse_args()
+    rng = random.Random(args.seed)
+    for i in range(args.n):
+        s = rng.randint(1, 10_000_000)
+        pos, neg = build_prompt(args.explicit, seed=s)
+        print(f"# {i+1} seed={s}\n{pos}\n")
+
+
+if __name__ == "__main__":
+    main()
